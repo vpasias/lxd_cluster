@@ -1,0 +1,48 @@
+chmod +x cloudlab-setup-ubuntu-tl.sh && ./cloudlab-setup-ubuntu-tl.sh && \
+sudo apt-get install libvirt-bin genisoimage libguestfs-tools libosinfo-bin virtinst qemu-kvm git vim net-tools wget curl bash-completion python-pip libvirt-daemon-system virt-manager bridge-utils libnss-libvirt libvirt-clients osinfo-db-tools intltool sshpass p7zip-full p7zip-rar -y && \
+sudo sed -i 's/hosts:          files dns/hosts:          files libvirt libvirt_guest dns/' /etc/nsswitch.conf && sudo lsmod | grep kvm && sudo reboot
+#sudo systemctl restart libvirtd && sudo systemctl status libvirtd
+
+screen
+# Press Return to continue
+# detach from session without killing it: Ctrl a d 
+# to see screen sessions: screen -ls
+# detach from closed session: screen -d -r 1929.pts-0.node0
+# enter session: screen -r 1929.pts-0.node0
+# exit a session and terminate it: exit
+
+sudo -i
+
+# Create OS node VMs
+cd /mnt/extra && cat /sys/module/kvm_intel/parameters/nested && cat /proc/cpuinfo | awk '/^processor/{print $3}' | wc -l && free -h && df -hT && sudo virsh list --all && sudo brctl show && \
+mkdir -p /mnt/extra/virt/images && mkdir -p /mnt/extra/virt/vms && cd /mnt/extra/virt/images && \
+cd /usr/lib/ipxe/qemu/ && wget https://github.com/qemu/qemu/raw/master/pc-bios/efi-e1000e.rom && cd /mnt/extra && \
+wget -O "/mnt/extra/osinfo-db.tar.xz" https://releases.pagure.org/libosinfo/osinfo-db-20210903.tar.xz && sudo osinfo-db-import --local "/mnt/extra/osinfo-db.tar.xz" && \
+cd /mnt/extra/ && git clone https://github.com/giovtorres/kvm-install-vm.git && cd kvm-install-vm
+
+##################################################################################################################################################################################
+######################################## LXD Cluster (https://github.com/vpasias/lxd_cluster) #############################################################################################################
+##################################################################################################################################################################################
+
+git clone https://github.com/vpasias/lxd_cluster.git && ls -lah
+
+cd /mnt/extra/kvm-install-vm && cp /mnt/extra/kvm-install-vm/lxd_cluster/vm_deployment.sh . && chmod +x vm_deployment.sh && ./vm_deployment.sh
+
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo ip a"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "uname -a"; done
+
+ssh -o "StrictHostKeyChecking=no" ubuntu@n1
+
+git clone https://github.com/vpasias/lxd_cluster.git && ls -lah
+
+cd ~ && cp /home/ubuntu/lxd_cluster/run-conf.sh . && chmod +x run-conf.sh && ./run-conf.sh
+
+ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph -s"
+ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph df"
+ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph osd lspools"
+
+# virsh console n1
+# virsh shutdown n1
+# virsh start n1
+# virsh list --all
+# for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {0..3}; do virsh start n$i; done && sleep 10 && virsh list --all
