@@ -12,15 +12,16 @@ cat > /mnt/extra/management.xml <<EOF
   <ip address='192.168.254.1' netmask='255.255.255.0'>
     <dhcp>
       <range start='192.168.254.2' end='192.168.254.249'/>
-      <host mac='52:54:00:8a:8b:c1' name='n1' ip='192.168.254.100'/>
-      <host mac='52:54:00:8a:8b:c2' name='n2' ip='192.168.254.101'/>
-      <host mac='52:54:00:8a:8b:c3' name='n3' ip='192.168.254.102'/>
-      <host mac='52:54:00:8a:8b:c4' name='n4' ip='192.168.254.103'/>
-      <host mac='52:54:00:8a:8b:c5' name='n5' ip='192.168.254.104'/>
-      <host mac='52:54:00:8a:8b:c6' name='n6' ip='192.168.254.105'/>
-      <host mac='52:54:00:8a:8b:c7' name='n7' ip='192.168.254.106'/>
-      <host mac='52:54:00:8a:8b:c8' name='n8' ip='192.168.254.107'/>
-      <host mac='52:54:00:8a:8b:c9' name='n9' ip='192.168.254.108'/>
+      <host mac='52:54:00:8a:8b:c0' name='n0' ip='192.168.254.100'/>
+      <host mac='52:54:00:8a:8b:c1' name='n1' ip='192.168.254.101'/>
+      <host mac='52:54:00:8a:8b:c2' name='n2' ip='192.168.254.102'/>
+      <host mac='52:54:00:8a:8b:c3' name='n3' ip='192.168.254.103'/>
+      <host mac='52:54:00:8a:8b:c4' name='n4' ip='192.168.254.104'/>
+      <host mac='52:54:00:8a:8b:c5' name='n5' ip='192.168.254.105'/>
+      <host mac='52:54:00:8a:8b:c6' name='n6' ip='192.168.254.106'/>
+      <host mac='52:54:00:8a:8b:c7' name='n7' ip='192.168.254.107'/>
+      <host mac='52:54:00:8a:8b:c8' name='n8' ip='192.168.254.108'/>
+      <host mac='52:54:00:8a:8b:c9' name='n9' ip='192.168.254.109'/>
     </dhcp>
   </ip>
 </network>
@@ -50,6 +51,9 @@ ip a && sudo virsh net-list --all
 
 sleep 20
 
+# Node 0
+./kvm-install-vm create -c 2 -m 8192 -d 80 -t ubuntu2004 -f host-passthrough -k /root/.ssh/id_rsa.pub -l /mnt/extra/virt/images -L /mnt/extra/virt/vms -b virbr100 -T US/Eastern -M 52:54:00:8a:8b:c0 n0
+
 # Node 1
 ./kvm-install-vm create -c 6 -m 32768 -d 120 -t ubuntu2004 -f host-passthrough -k /root/.ssh/id_rsa.pub -l /mnt/extra/virt/images -L /mnt/extra/virt/vms -b virbr100 -T US/Eastern -M 52:54:00:8a:8b:c1 n1
 
@@ -63,44 +67,46 @@ sleep 60
 
 virsh list --all && brctl show && virsh net-list --all
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i 'echo "root:gprm8350" | sudo chpasswd'; done
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i 'echo "ubuntu:kyax7344" | sudo chpasswd'; done
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config"; done
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config"; done
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo systemctl restart sshd"; done
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo rm -rf /root/.ssh/authorized_keys"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i 'echo "root:gprm8350" | sudo chpasswd'; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i 'echo "ubuntu:kyax7344" | sudo chpasswd'; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo systemctl restart sshd"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo rm -rf /root/.ssh/authorized_keys"; done
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo hostnamectl set-hostname n$i --static"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo hostnamectl set-hostname n$i --static"; done
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y && sudo apt-get install -y git vim net-tools wget curl bash-completion apt-utils iperf iperf3 mtr traceroute netcat sshpass socat"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y && sudo apt-get install -y git vim net-tools wget curl bash-completion apt-utils iperf iperf3 mtr traceroute netcat sshpass socat python3 python3-simplejson xfsprogs"; done
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo chmod -x /etc/update-motd.d/*"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo modprobe -v xfs && sudo grep xfs /proc/filesystems && sudo modinfo xfs && sudo mkdir -p /etc/apt/sources.list.d"; done
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i 'cat << EOF | sudo tee /etc/update-motd.d/01-custom
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo chmod -x /etc/update-motd.d/*"; done
+
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i 'cat << EOF | sudo tee /etc/update-motd.d/01-custom
 #!/bin/sh
 echo "****************************WARNING****************************************
 UNAUTHORISED ACCESS IS PROHIBITED. VIOLATORS WILL BE PROSECUTED.
 *********************************************************************************"
 EOF'; done
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo chmod +x /etc/update-motd.d/01-custom"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo chmod +x /etc/update-motd.d/01-custom"; done
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/modprobe.d/qemu-system-x86.conf
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/modprobe.d/qemu-system-x86.conf
 options kvm_intel nested=1
 EOF"; done
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo DEBIAN_FRONTEND=noninteractive apt-get install linux-generic-hwe-20.04 --install-recommends -y"; done
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt autoremove -y && sudo apt --fix-broken install -y"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo DEBIAN_FRONTEND=noninteractive apt-get install linux-generic-hwe-20.04 --install-recommends -y"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt autoremove -y && sudo apt --fix-broken install -y"; done
 
-for i in {1..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {1..3}; do virsh start n$i; done && sleep 10 && virsh list --all
-
-sleep 30
-
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo mkdir -p /etc/systemd/system/networking.service.d"; done
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/systemd/system/networking.service.d/reduce-timeout.conf
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo mkdir -p /etc/systemd/system/networking.service.d"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/systemd/system/networking.service.d/reduce-timeout.conf
 [Service]
 TimeoutStartSec=15
 EOF"; done
+
+for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {1..3}; do virsh start n$i; done && sleep 10 && virsh list --all
+
+sleep 30
 
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y"; done
 
@@ -117,15 +123,16 @@ for i in {1..3}; do virsh attach-interface --domain n$i --type network --source 
 
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/hosts
 127.0.0.1 localhost
-192.168.254.100  n1
-192.168.254.101  n2
-192.168.254.102  n3
-192.168.254.103  n4
-192.168.254.104  n5
-192.168.254.105  n6
-192.168.254.106  n7
-192.168.254.107  n8
-192.168.254.108  n9
+192.168.254.100  n0
+192.168.254.101  n1
+192.168.254.102  n2
+192.168.254.103  n3
+192.168.254.104  n4
+192.168.254.105  n5
+192.168.254.106  n6
+192.168.254.107  n7
+192.168.254.108  n8
+192.168.254.109  n9
 
 # The following lines are desirable for IPv6 capable hosts
 ::1 ip6-localhost ip6-loopback
