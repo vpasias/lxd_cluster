@@ -1,2 +1,2 @@
-# lxd_cluster
+# LXD Cluster
 LXD Cluster based on KVM VMs
