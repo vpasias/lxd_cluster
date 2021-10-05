@@ -22,7 +22,8 @@ sshpass -p kyax7344 ssh-copy-id -o StrictHostKeyChecking=no ubuntu@n2
 echo 'run-conf.sh: Running ssh-copy-id for n3'
 sshpass -p kyax7344 ssh-copy-id -o StrictHostKeyChecking=no ubuntu@n3
 
-# Check connectivity
+echo 'run-conf.sh: Check Connectivity'
+
 ssh -o StrictHostKeyChecking=no ubuntu@n1 "uname -a"
 ssh -o StrictHostKeyChecking=no ubuntu@n2 "uname -a"
 ssh -o StrictHostKeyChecking=no ubuntu@n3 "uname -a"
@@ -111,3 +112,14 @@ ansible -m ping -i hosts mons
 echo 'run-conf.sh: Run Ceph-Ansible'
 
 ansible-playbook site-container.yml -i hosts
+
+echo 'run-conf.sh: Check Ceph Status'
+
+ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker ps"
+ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph -s"
+ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph df"
+ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph osd tree"
+
+echo 'run-conf.sh: Create Ceph pool for LXD'
+
+ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph osd pool create lxd-ceph 256"
