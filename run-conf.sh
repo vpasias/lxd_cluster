@@ -46,22 +46,22 @@ echo 'run-conf.sh: Configuration of Ceph-Ansible'
 
 git clone https://github.com/ceph/ceph-ansible.git
 cd ceph-ansible
-git checkout stable-5.0
+git checkout stable-6.0
 sudo pip install -r requirements.txt
 
 cat << EOF | tee group_vars/all.yml
 generate_fsid: true
-monitor_interface: ens11
+monitor_interface: ens10
 journal_size: 5120
 public_network: 172.16.1.0/24
 cluster_network: 172.16.1.0/24
-cluster_interface: ens11
+cluster_interface: ens10
 ceph_docker_image: "ceph/daemon"
-ceph_docker_image_tag: latest-octopus
+ceph_docker_image_tag: latest-pacific
 containerized_deployment: true
 osd_objectstore: bluestore
 ceph_docker_registry: docker.io
-radosgw_interface: ens11
+radosgw_interface: ens10
 dashboard_admin_user: ubuntu
 dashboard_admin_password: ubuntu
 grafana_admin_user: ubuntu
