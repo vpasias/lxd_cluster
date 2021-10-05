@@ -111,11 +111,11 @@ sleep 30
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y"; done
 
 for i in {1..3}; do qemu-img create -f qcow2 vbdnode1$i 120G; done
-#for i in {1..3}; do qemu-img create -f qcow2 vbdnode2$i 120G; done
+for i in {1..3}; do qemu-img create -f qcow2 vbdnode2$i 120G; done
 #for i in {1..3}; do qemu-img create -f qcow2 vbdnode3$i 120G; done
 
 for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode1$i.qcow2 -t vdb n$i; done
-#for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode2$i.qcow2 -t vdc n$i; done
+for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode2$i.qcow2 -t vdc n$i; done
 #for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode3$i.qcow2 -t vdd n$i; done
 
 for i in {1..3}; do virsh attach-interface --domain n$i --type network --source storage --model e1000 --mac 02:00:aa:0a:01:1$i --config --live; done
@@ -154,6 +154,7 @@ net.ipv6.neigh.default.gc_thresh3=8192
 net.core.bpf_jit_limit=3000000000
 kernel.keys.maxkeys=2000
 kernel.keys.maxbytes=2000000
+net.ipv4.ip_forward=1
 EOF"; done
 
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo sysctl --system"; done
@@ -163,5 +164,71 @@ for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "#echo vm.swapp
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y && sudo apt-get purge liblxc1 lxcfs lxd lxd-client -y && sudo apt-get install zfsutils-linux -y && sudo snap install lxd"; done
 
 for i in {1..1}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo snap install juju --classic && sudo snap install openstackclients --classic"; done
+
+ssh -o "StrictHostKeyChecking=no" ubuntu@n1 "cat << EOF | sudo tee /etc/netplan/01-netcfg.yaml
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens3:
+      dhcp4: true
+      set-name: ens3
+    ens10:
+      dhcp4: false
+      set-name: ens10
+      addresses:
+        - 172.16.1.11/24
+    ens11:
+      dhcp4: false
+      set-name: ens11
+      addresses:
+        - 172.16.2.11/24     
+EOF"
+
+ssh -o "StrictHostKeyChecking=no" ubuntu@n2 "cat << EOF | sudo tee /etc/netplan/01-netcfg.yaml
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens3:
+      dhcp4: true
+      set-name: ens3
+    ens10:
+      dhcp4: false
+      set-name: ens10
+      addresses:
+        - 172.16.1.12/24
+    ens11:
+      dhcp4: false
+      set-name: ens11
+      addresses:
+        - 172.16.2.12/24     
+EOF"
+
+ssh -o "StrictHostKeyChecking=no" ubuntu@n3 "cat << EOF | sudo tee /etc/netplan/01-netcfg.yaml
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens3:
+      dhcp4: true
+      set-name: ens3
+    ens10:
+      dhcp4: false
+      set-name: ens10
+      addresses:
+        - 172.16.1.13/24
+    ens11:
+      dhcp4: false
+      set-name: ens11
+      addresses:
+        - 172.16.2.13/24     
+EOF"
 
 for i in {1..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {1..3}; do virsh start n$i; done && sleep 10 && virsh list --all
