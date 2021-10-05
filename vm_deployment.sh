@@ -26,25 +26,25 @@ cat > /mnt/extra/management.xml <<EOF
 </network>
 EOF
 
-cat > /mnt/extra/external.xml <<EOF
+cat > /mnt/extra/storage.xml <<EOF
 <network>
-  <name>external</name>
+  <name>storage</name>
   <bridge name="virbr101" stp='off' macTableManager="kernel"/>
   <mtu size="9216"/> 
 </network>
 EOF
 
-cat > /mnt/extra/internal.xml <<EOF
+cat > /mnt/extra/cluster.xml <<EOF
 <network>
-  <name>internal</name>
+  <name>cluster</name>
   <bridge name="virbr102" stp='off' macTableManager="kernel"/>
   <mtu size="9216"/> 
 </network>
 EOF
 
 virsh net-define /mnt/extra/management.xml && virsh net-autostart management && virsh net-start management
-virsh net-define /mnt/extra/external.xml && virsh net-autostart external && virsh net-start external
-virsh net-define /mnt/extra/internal.xml && virsh net-autostart internal && virsh net-start internal
+virsh net-define /mnt/extra/storage.xml && virsh net-autostart storage && virsh net-start storage
+virsh net-define /mnt/extra/cluster.xml && virsh net-autostart cluster && virsh net-start cluster
 
 ip a && sudo virsh net-list --all
 
@@ -105,15 +105,15 @@ EOF"; done
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y"; done
 
 for i in {1..3}; do qemu-img create -f qcow2 vbdnode1$i 120G; done
-for i in {1..3}; do qemu-img create -f qcow2 vbdnode2$i 120G; done
-for i in {1..3}; do qemu-img create -f qcow2 vbdnode3$i 120G; done
+#for i in {1..3}; do qemu-img create -f qcow2 vbdnode2$i 120G; done
+#for i in {1..3}; do qemu-img create -f qcow2 vbdnode3$i 120G; done
 
 for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode1$i.qcow2 -t vdb n$i; done
-for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode2$i.qcow2 -t vdc n$i; done
-for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode3$i.qcow2 -t vdd n$i; done
+#for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode2$i.qcow2 -t vdc n$i; done
+#for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-install-vm/vbdnode3$i.qcow2 -t vdd n$i; done
 
-for i in {1..3}; do virsh attach-interface --domain n$i --type network --source internal --model e1000 --mac 02:00:aa:0a:01:1$i --config --live; done
-for i in {1..3}; do virsh attach-interface --domain n$i --type network --source external --model e1000 --mac 02:00:aa:0a:02:1$i --config --live; done
+for i in {1..3}; do virsh attach-interface --domain n$i --type network --source storage --model e1000 --mac 02:00:aa:0a:01:1$i --config --live; done
+for i in {1..3}; do virsh attach-interface --domain n$i --type network --source cluster --model e1000 --mac 02:00:aa:0a:02:1$i --config --live; done
 
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/hosts
 127.0.0.1 localhost
@@ -135,5 +135,26 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 EOF"; done
+
+for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/sysctl.d/60-lxd-production.conf
+fs.inotify.max_queued_events=1048576
+fs.inotify.max_user_instances=1048576
+fs.inotify.max_user_watches=1048576
+vm.max_map_count=262144
+kernel.dmesg_restrict=1
+net.ipv4.neigh.default.gc_thresh3=8192
+net.ipv6.neigh.default.gc_thresh3=8192
+net.core.bpf_jit_limit=3000000000
+kernel.keys.maxkeys=2000
+kernel.keys.maxbytes=2000000
+EOF"; done
+
+for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo sysctl --system"; done
+
+for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "#echo vm.swappiness=1 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p"; done
+
+for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y && sudo apt-get purge liblxc1 lxcfs lxd lxd-client -y && sudo apt-get install zfsutils-linux -y && sudo snap install lxd"; done
+
+for i in {1..1}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo snap install juju --classic && sudo snap install openstackclients --classic"; done
 
 for i in {1..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {1..3}; do virsh start n$i; done && sleep 10 && virsh list --all
