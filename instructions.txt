@@ -122,6 +122,9 @@ sudo lxd init
 # ...
 #Would you like a YAML "lxd init" preseed to be printed? (yes/no) [default=no]:
 
+exit
+
+ssh -o "StrictHostKeyChecking=no" ubuntu@n1
 sudo lxc cluster list
 
 # Test
@@ -131,3 +134,6 @@ sudo lxc launch ubuntu-daily:focal test-3
 sudo lxc cluster list
 sudo lxc exec test-1 whoami
 sudo lxc delete -f test-1 && sudo lxc delete -f test-2 && sudo lxc delete -f test-3
+
+### Openstack
+# https://github.com/openstack-charmers/openstack-on-lxd
