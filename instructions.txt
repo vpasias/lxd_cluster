@@ -24,6 +24,7 @@ cd /mnt/extra/ && git clone https://github.com/giovtorres/kvm-install-vm.git && 
 ######################################## LXD Cluster (https://github.com/vpasias/lxd_cluster) #############################################################################################################
 ##################################################################################################################################################################################
 
+### Install Ceph
 git clone https://github.com/vpasias/lxd_cluster.git && ls -lah
 
 cd /mnt/extra/kvm-install-vm && cp /mnt/extra/kvm-install-vm/lxd_cluster/vm_deployment.sh . && chmod +x vm_deployment.sh && ./vm_deployment.sh
@@ -31,11 +32,11 @@ cd /mnt/extra/kvm-install-vm && cp /mnt/extra/kvm-install-vm/lxd_cluster/vm_depl
 for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo ip a"; done
 for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "uname -a"; done
 
-ssh -o "StrictHostKeyChecking=no" ubuntu@n1
+ssh -o "StrictHostKeyChecking=no" ubuntu@n0
 
 git clone https://github.com/vpasias/lxd_cluster.git && ls -lah
 
-cd ~ && cp /home/ubuntu/lxd_cluster/run-conf.sh . && chmod +x run-conf.sh && ./run-conf.sh
+cd ~ && cp /home/ubuntu/lxd_cluster/run-conf-ceph.sh . && chmod +x run-conf-ceph.sh && ./run-conf-ceph.sh
 
 ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph -s"
 ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph df"
@@ -46,3 +47,6 @@ ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph
 # virsh start n1
 # virsh list --all
 # for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {0..3}; do virsh start n$i; done && sleep 10 && virsh list --all
+
+### Realise LXD Cluster
+
