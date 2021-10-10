@@ -137,3 +137,9 @@ sudo lxc delete -f test-1 && sudo lxc delete -f test-2 && sudo lxc delete -f tes
 
 ### Openstack
 # https://github.com/openstack-charmers/openstack-on-lxd
+
+### Delete
+cd /mydata/extra/kvm-install-vm && \
+for i in {0..3}; do ./kvm-install-vm remove n$i; done && rm -rf vbdnode1* && rm -rf vbdnode2* && virsh net-destroy management && \
+rm -rf /mydata/extra/management.xml && virsh net-destroy cluster && rm -rf /mydata/extra/cluster.xml && virsh net-destroy storage && rm -rf /mydata/extra/storage.xml && \
+sudo virsh list --all && sudo brctl show && sudo virsh net-list --all
