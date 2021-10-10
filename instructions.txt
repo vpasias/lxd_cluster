@@ -135,6 +135,8 @@ sudo lxc launch ubuntu-daily:focal test-2
 sudo lxc launch ubuntu-daily:focal test-3
 sudo lxc list
 sudo lxc exec test-1 whoami
+sudo lxc exec test-3 ping ase.com
+sudo lxc exec test-2 -- sh -c "df -hT"
 sudo lxc delete -f test-1 && sudo lxc delete -f test-2 && sudo lxc delete -f test-3
 
 ### Openstack
