@@ -52,17 +52,17 @@ sudo pip install -r requirements.txt
 
 cat << EOF | tee group_vars/all.yml
 generate_fsid: true
-monitor_interface: ens10
+monitor_interface: ens11
 journal_size: 5120
 public_network: 172.16.1.0/24
 cluster_network: 172.16.1.0/24
-cluster_interface: ens10
+cluster_interface: ens11
 ceph_docker_image: "ceph/daemon"
 ceph_docker_image_tag: latest-pacific
 containerized_deployment: true
 osd_objectstore: bluestore
 ceph_docker_registry: docker.io
-radosgw_interface: ens10
+radosgw_interface: ens11
 dashboard_admin_user: ubuntu
 dashboard_admin_password: ubuntu
 grafana_admin_user: ubuntu
