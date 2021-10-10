@@ -106,11 +106,11 @@ for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | s
 TimeoutStartSec=15
 EOF"; done
 
-for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {1..3}; do virsh start n$i; done && sleep 10 && virsh list --all
+for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {0..3}; do virsh start n$i; done && sleep 10 && virsh list --all
 
 sleep 30
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y"; done
 
 for i in {1..3}; do qemu-img create -f qcow2 vbdnode1$i 120G; done
 for i in {1..3}; do qemu-img create -f qcow2 vbdnode2$i 120G; done
