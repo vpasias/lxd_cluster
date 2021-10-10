@@ -142,4 +142,5 @@ sudo lxc delete -f test-1 && sudo lxc delete -f test-2 && sudo lxc delete -f tes
 cd /mnt/extra/kvm-install-vm && \
 for i in {0..3}; do ./kvm-install-vm remove n$i; done && rm -rf vbdnode1* && rm -rf vbdnode2* && virsh net-destroy management && \
 rm -rf /mnt/extra/management.xml && virsh net-destroy cluster && rm -rf /mnt/extra/cluster.xml && virsh net-destroy storage && rm -rf /mnt/extra/storage.xml && \
+virsh net-undefine management && virsh net-undefine cluster && virsh net-undefine storage && \
 sudo virsh list --all && sudo brctl show && sudo virsh net-list --all
