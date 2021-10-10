@@ -133,7 +133,7 @@ sudo lxc cluster list
 sudo lxc launch ubuntu-daily:focal test-1
 sudo lxc launch ubuntu-daily:focal test-2
 sudo lxc launch ubuntu-daily:focal test-3
-sudo lxc list status=running && sudo lxc list status=stopped
+sudo lxc list
 sudo lxc exec test-1 whoami
 sudo lxc delete -f test-1 && sudo lxc delete -f test-2 && sudo lxc delete -f test-3
 
