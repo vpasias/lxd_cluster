@@ -35,10 +35,14 @@ ssh -o "StrictHostKeyChecking=no" ubuntu@n0
 ### Install Ceph
 git clone https://github.com/vpasias/lxd_cluster.git && ls -lah && \
 cd ~ && cp /home/ubuntu/lxd_cluster/run-conf-ceph.sh . && chmod +x run-conf-ceph.sh && ./run-conf-ceph.sh
+exit
 
-ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph -s"
-ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph df"
-ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph osd lspools"
+ssh -o StrictHostKeyChecking=no ubuntu@n1
+sudo docker exec -it ceph-mon-n1 ceph -s
+sudo docker exec -it ceph-mon-n1 ceph df
+sudo docker exec -it ceph-mon-n1 ceph osd tree
+sudo docker exec -it ceph-mon-n1 ceph osd pool create lxd-ceph 256
+sudo docker exec -it ceph-mon-n1 ceph osd lspools
 
 # virsh console n1
 # virsh shutdown n1
