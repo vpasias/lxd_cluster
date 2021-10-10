@@ -195,15 +195,12 @@ network:
   ethernets:
     ens3:
       dhcp4: true
-      set-name: ens3
     ens11:
       dhcp4: false
-      set-name: ens11
       addresses:
         - 172.16.1.11/24
     ens12:
       dhcp4: false
-      set-name: ens12
       addresses:
         - 172.16.2.11/24     
 EOF"
@@ -217,15 +214,12 @@ network:
   ethernets:
     ens3:
       dhcp4: true
-      set-name: ens3
     ens11:
       dhcp4: false
-      set-name: ens11
       addresses:
         - 172.16.1.12/24
     ens12:
       dhcp4: false
-      set-name: ens12
       addresses:
         - 172.16.2.12/24     
 EOF"
@@ -239,15 +233,12 @@ network:
   ethernets:
     ens3:
       dhcp4: true
-      set-name: ens3
     ens11:
       dhcp4: false
-      set-name: ens11
       addresses:
         - 172.16.1.13/24
     ens12:
       dhcp4: false
-      set-name: ens12
       addresses:
         - 172.16.2.13/24     
 EOF"
