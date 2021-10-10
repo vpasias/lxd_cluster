@@ -123,7 +123,7 @@ for i in {1..3}; do ./kvm-install-vm attach-disk -d 120 -s /mnt/extra/kvm-instal
 for i in {1..3}; do virsh attach-interface --domain n$i --type network --source storage --model e1000 --mac 02:00:aa:0a:01:1$i --config --live; done
 for i in {1..3}; do virsh attach-interface --domain n$i --type network --source cluster --model e1000 --mac 02:00:aa:0a:02:1$i --config --live; done
 
-for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/hosts
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/hosts
 127.0.0.1 localhost
 192.168.254.100  n0
 192.168.254.101  n1
@@ -198,12 +198,12 @@ network:
       set-name: ens3
     ens10:
       dhcp4: false
-      set-name: ens10
+      set-name: ens11
       addresses:
         - 172.16.1.11/24
     ens11:
       dhcp4: false
-      set-name: ens11
+      set-name: ens12
       addresses:
         - 172.16.2.11/24     
 EOF"
@@ -220,12 +220,12 @@ network:
       set-name: ens3
     ens10:
       dhcp4: false
-      set-name: ens10
+      set-name: ens11
       addresses:
         - 172.16.1.12/24
     ens11:
       dhcp4: false
-      set-name: ens11
+      set-name: ens12
       addresses:
         - 172.16.2.12/24     
 EOF"
@@ -242,14 +242,14 @@ network:
       set-name: ens3
     ens10:
       dhcp4: false
-      set-name: ens10
+      set-name: ens11
       addresses:
         - 172.16.1.13/24
     ens11:
       dhcp4: false
-      set-name: ens11
+      set-name: ens12
       addresses:
         - 172.16.2.13/24     
 EOF"
 
-for i in {1..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {1..3}; do virsh start n$i; done && sleep 10 && virsh list --all
+for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {0..3}; do virsh start n$i; done && sleep 10 && virsh list --all
