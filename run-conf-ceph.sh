@@ -116,10 +116,3 @@ ansible-playbook site-container.yml -i hosts
 echo 'run-conf.sh: Check Ceph Status'
 
 ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker ps"
-ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph -s"
-ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph df"
-ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph osd tree"
-
-echo 'run-conf.sh: Create Ceph pool for LXD'
-
-ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph osd pool create lxd-ceph 256"
