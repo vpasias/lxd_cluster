@@ -24,7 +24,6 @@ cd /mnt/extra/ && git clone https://github.com/giovtorres/kvm-install-vm.git && 
 ######################################## LXD Cluster (https://github.com/vpasias/lxd_cluster) #############################################################################################################
 ##################################################################################################################################################################################
 
-### Install Ceph
 git clone https://github.com/vpasias/lxd_cluster.git && ls -lah
 
 cd /mnt/extra/kvm-install-vm && cp /mnt/extra/kvm-install-vm/lxd_cluster/vm_deployment.sh . && chmod +x vm_deployment.sh && ./vm_deployment.sh
@@ -34,6 +33,7 @@ for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "uname -a"; don
 
 ssh -o "StrictHostKeyChecking=no" ubuntu@n0
 
+### Install Ceph
 git clone https://github.com/vpasias/lxd_cluster.git && ls -lah
 
 cd ~ && cp /home/ubuntu/lxd_cluster/run-conf-ceph.sh . && chmod +x run-conf-ceph.sh && ./run-conf-ceph.sh
