@@ -33,8 +33,7 @@ for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "uname -a"; don
 ssh -o "StrictHostKeyChecking=no" ubuntu@n0
 
 ### Install Ceph
-git clone https://github.com/vpasias/lxd_cluster.git && ls -lah
-
+git clone https://github.com/vpasias/lxd_cluster.git && ls -lah && \
 cd ~ && cp /home/ubuntu/lxd_cluster/run-conf-ceph.sh . && chmod +x run-conf-ceph.sh && ./run-conf-ceph.sh
 
 ssh -o StrictHostKeyChecking=no ubuntu@n1 "sudo docker exec -it ceph-mon-n1 ceph -s"
