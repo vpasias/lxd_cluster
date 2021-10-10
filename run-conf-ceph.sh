@@ -63,10 +63,10 @@ containerized_deployment: true
 osd_objectstore: bluestore
 ceph_docker_registry: docker.io
 radosgw_interface: ens11
-dashboard_admin_user: ubuntu
-dashboard_admin_password: ubuntu
-grafana_admin_user: ubuntu
-grafana_admin_password: ubuntu
+dashboard_admin_user: admin
+dashboard_admin_password: gprm8350
+grafana_admin_user: admin
+grafana_admin_password: gprm8350
 EOF
 
 cat << EOF | tee group_vars/osds.yml
