@@ -184,7 +184,21 @@ for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo systemctl
 
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y && sudo apt-get purge liblxc1 lxcfs lxd lxd-client -y && sudo apt-get install zfsutils-linux -y && sudo snap install lxd"; done
 
-for i in {1..1}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo snap install juju --classic && sudo snap install openstackclients --classic"; done
+for i in {0..0}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo snap install juju --classic && sudo snap install openstackclients --classic"; done
+
+ssh -o "StrictHostKeyChecking=no" ubuntu@n0 "cat << EOF | sudo tee /etc/netplan/01-netcfg.yaml
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens3:
+      dhcp4: true
+      routes:                                                                                                                                                                   
+        - to: 10.0.8.0/24                                                                                                                                                               
+          via: 192.168.254.101
+EOF"
 
 ssh -o "StrictHostKeyChecking=no" ubuntu@n1 "cat << EOF | sudo tee /etc/netplan/01-netcfg.yaml
 # This file describes the network interfaces available on your system
