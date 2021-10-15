@@ -257,4 +257,20 @@ network:
         - 172.16.2.13/24     
 EOF"
 
+ssh -o "StrictHostKeyChecking=no" ubuntu@n0 "cat << EOF | sudo tee /home/ubuntu/clouds.yaml
+clouds:
+  lxd-remote:
+    type: lxd
+    auth-types: [interactive, certificate]
+    endpoint: https://192.168.254.101:8443/
+EOF"
+
+ssh -o "StrictHostKeyChecking=no" ubuntu@n0 "cat << EOF | sudo tee /home/ubuntu/credentials.yaml
+credentials:
+    lxd-remote:
+        admin:
+            auth-type: interactive
+            trust-password: gprm8350
+EOF"
+
 for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {0..3}; do virsh start n$i; done && sleep 10 && virsh list --all
