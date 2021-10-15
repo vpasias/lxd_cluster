@@ -158,6 +158,16 @@ juju bootstrap lxd-remote
 ### Openstack
 # https://github.com/openstack-charmers/openstack-on-lxd
 
+git clone https://github.com/openstack-charmers/openstack-on-lxd.git ~/openstack-on-lxd && cd ~/openstack-on-lxd
+cat lxd-profile.yaml | lxc profile edit juju-default
+
+# Update the LXD cloud container profile
+lxc profile device set juju-default root pool=lxd-ceph
+lxc profile show juju-default
+
+# Deploy the cloud
+juju deploy ./bundle-focal-victoria.yaml
+
 ### Delete
 cd /mnt/extra/kvm-install-vm && \
 for i in {0..3}; do ./kvm-install-vm remove n$i; done && rm -rf vbdnode1* && rm -rf vbdnode2* && virsh net-destroy management && \
