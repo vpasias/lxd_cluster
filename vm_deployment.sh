@@ -257,7 +257,7 @@ network:
         - 172.16.2.13/24     
 EOF"
 
-ssh -o "StrictHostKeyChecking=no" ubuntu@n0 "cat << EOF | sudo tee /home/ubuntu/clouds.yaml
+ssh -o "StrictHostKeyChecking=no" ubuntu@n0 "cat << EOF | tee /home/ubuntu/clouds.yaml
 clouds:
   lxd-remote:
     type: lxd
@@ -265,7 +265,7 @@ clouds:
     endpoint: https://192.168.254.101:8443/
 EOF"
 
-ssh -o "StrictHostKeyChecking=no" ubuntu@n0 "cat << EOF | sudo tee /home/ubuntu/credentials.yaml
+ssh -o "StrictHostKeyChecking=no" ubuntu@n0 "cat << EOF | tee /home/ubuntu/credentials.yaml
 credentials:
     lxd-remote:
         admin:
