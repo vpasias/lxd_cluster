@@ -7,8 +7,8 @@ screen
 # Press Return to continue
 # detach from session without killing it: Ctrl a d 
 # to see screen sessions: screen -ls
-# detach from closed session: screen -d -r 1929.pts-0.node0
-# enter session: screen -r 1929.pts-0.node0
+# detach from closed session: screen -d -r 1990.pts-0.node0
+# enter session: screen -r 1990.pts-0.node0
 # exit a session and terminate it: exit
 
 sudo -i
@@ -27,7 +27,7 @@ cd /mnt/extra/ && git clone https://github.com/giovtorres/kvm-install-vm.git && 
 git clone https://github.com/vpasias/lxd_cluster.git && ls -lah && \
 cd /mnt/extra/kvm-install-vm && cp /mnt/extra/kvm-install-vm/lxd_cluster/vm_deployment.sh . && chmod +x vm_deployment.sh && ./vm_deployment.sh
 
-for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo ip a"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo ip a"; done && \
 for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "uname -a"; done
 
 ssh -o "StrictHostKeyChecking=no" ubuntu@n0
@@ -37,18 +37,14 @@ git clone https://github.com/vpasias/lxd_cluster.git && ls -lah && \
 cd ~ && cp /home/ubuntu/lxd_cluster/run-conf-ceph.sh . && chmod +x run-conf-ceph.sh && ./run-conf-ceph.sh
 exit
 
-ssh -o StrictHostKeyChecking=no ubuntu@n1
-sudo docker exec -it ceph-mon-n1 ceph -s
-sudo docker exec -it ceph-mon-n1 ceph df
-sudo docker exec -it ceph-mon-n1 ceph osd tree
-sudo docker exec -it ceph-mon-n1 ceph osd pool create lxd-ceph 256
+ssh -o "StrictHostKeyChecking=no" ubuntu@n1
+sudo docker exec -it ceph-mon-n1 ceph -s && \
+sudo docker exec -it ceph-mon-n1 ceph osd pool create lxd-ceph 256 && \
+sudo docker exec -it ceph-mon-n1 ceph df && \
+sudo docker exec -it ceph-mon-n1 ceph osd tree && \
 sudo docker exec -it ceph-mon-n1 ceph osd lspools
 
-# virsh console n1
-# virsh shutdown n1
-# virsh start n1
-# virsh list --all
-# for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {0..3}; do virsh start n$i; done && sleep 10 && virsh list --all
+exit
 
 ### Realise LXD Cluster
 
@@ -57,6 +53,9 @@ sudo iptables -L
 #sudo newgrp lxd
 
 sudo lxc network create lxdbr0 ipv6.address=none ipv4.address=10.0.8.1/24 ipv4.dhcp.ranges=10.0.8.2-10.0.8.200 bridge.mtu=9000 ipv4.nat=true ipv6.nat=false
+
+# lxc network set lxdbr0 ipv4.address 10.0.8.1/24 && lxc network set lxdbr0 ipv4.dhcp.ranges 10.0.8.2-10.0.8.200 && lxc network set lxdbr0 bridge.mtu 9000 && lxc network unset lxdbr0 ipv6.address && lxc network unset lxdbr0 ipv6.nat
+# lxc network set lxdbr0 ipv4.nat=true
 
 sudo lxd init
 
@@ -92,6 +91,7 @@ sudo lxd init
 
 #Would you like to use LXD clustering? (yes/no) [default=no]: yes
 #What name should be used to identify this node in the cluster? [default=n2]:
+#Do you have a join token? (yes/no) [default=no]: no
 #What IP address or DNS name should be used to reach this node? [default=192.168.254.102]:
 #Are you joining an existing cluster? (yes/no) [default=no]: yes
 #IP address or FQDN of an existing cluster node: 192.168.254.101
@@ -113,6 +113,7 @@ sudo lxd init
 
 #Would you like to use LXD clustering? (yes/no) [default=no]: yes
 #What name should be used to identify this node in the cluster? [default=n3]:
+#Do you have a join token? (yes/no) [default=no]: no
 #What IP address or DNS name should be used to reach this node? [default=192.168.254.103]:
 #Are you joining an existing cluster? (yes/no) [default=no]: yes
 #IP address or FQDN of an existing cluster node: 192.168.254.101
@@ -127,7 +128,9 @@ sudo lxd init
 exit
 
 ssh -o "StrictHostKeyChecking=no" ubuntu@n1
-sudo lxc cluster list
+sudo lxc cluster list && \
+sudo lxc storage list && \
+sudo lxc network show lxdbr0
 
 # Test
 sudo lxc launch ubuntu-daily:focal test-1
@@ -136,24 +139,39 @@ sudo lxc launch ubuntu-daily:focal test-3
 sudo lxc list
 sudo lxc exec test-1 whoami
 sudo lxc exec test-1 -- sh -c "ip a"
-# IP address: 10.0.8.11
+# IP address: 10.0.8.30
 sudo lxc exec test-3 ping ase.com
 sudo lxc exec test-2 -- sh -c "df -hT"
 sudo lxc delete -f test-1 && sudo lxc delete -f test-2 && sudo lxc delete -f test-3
+exit
+
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -F FORWARD"; done && \
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P FORWARD ACCEPT"; done
+
+#for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -F INPUT"; done && for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P INPUT ACCEPT"; done
+
+#for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -F OUTPUT"; done && for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P OUTPUT ACCEPT"; done
 
 # Test remote connectivity for juju
 # https://discuss.linuxcontainers.org/t/define-lxd-cluster-as-juju-cloud-corrupt-cluster/4857/2
 ssh -o "StrictHostKeyChecking=no" ubuntu@n0
-ping 10.0.8.11
+ping 10.0.8.1
 
 # Register a remote LXD server as a LXD cloud
 juju add-cloud lxd-remote /home/ubuntu/clouds.yaml
 
 # Add the security credential
 juju add-credential lxd-remote -f /home/ubuntu/credentials.yaml
+juju clouds
 
 # Bootstrap to the New Cloud
-juju bootstrap lxd-remote
+juju bootstrap --bootstrap-series=focal --bootstrap-constraints "mem=4G cores=2" lxd-remote controller
+# juju bootstrap --bootstrap-constraints "mem=4G cores=2" lxd-remote lxd
+# juju bootstrap lxd-remote lxd 
+# Controller status
+juju controllers && juju whoami
+# Delete juju controller
+#  juju kill-controller -y lxd
 
 ### Openstack
 # https://github.com/openstack-charmers/openstack-on-lxd
@@ -168,7 +186,15 @@ lxc profile show juju-default
 # Deploy the cloud
 juju deploy ./bundle-focal-victoria.yaml
 
-### Delete
+#############################################################################################################
+################ Delete ########################################################################################
+#############################################################################################################
+# virsh console n1
+# virsh shutdown n1
+# virsh start n1
+# virsh list --all
+# for i in {0..3}; do virsh shutdown n$i; done && sleep 10 && virsh list --all && for i in {0..3}; do virsh start n$i; done && sleep 10 && virsh list --all
+
 cd /mnt/extra/kvm-install-vm && \
 for i in {0..3}; do ./kvm-install-vm remove n$i; done && rm -rf vbdnode1* && rm -rf vbdnode2* && virsh net-destroy management && \
 rm -rf /mnt/extra/management.xml && virsh net-destroy cluster && rm -rf /mnt/extra/cluster.xml && virsh net-destroy service && rm -rf /mnt/extra/service.xml && \
