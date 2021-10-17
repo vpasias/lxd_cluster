@@ -163,24 +163,24 @@ for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo sysctl --
 
 for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "#echo vm.swappiness=1 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p"; done
 
-for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/iptables.rules
-iptables -F FORWARD
-iptables -P FORWARD ACCEPT
-EOF"; done
+#for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/iptables.rules
+#iptables -F FORWARD
+#iptables -P FORWARD ACCEPT
+#EOF"; done
 
-for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/systemd/system/restore-iptables-rules.service
-[Unit]
-Description = Apply iptables rules
+#for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "cat << EOF | sudo tee /etc/systemd/system/restore-iptables-rules.service
+#[Unit]
+#Description = Apply iptables rules
+#
+#[Service]
+#Type=oneshot
+#ExecStart=/bin/sh -c 'iptables-restore < /etc/iptables.rules'
+#
+#[Install]
+#WantedBy=network-pre.target
+#EOF"; done
 
-[Service]
-Type=oneshot
-ExecStart=/bin/sh -c 'iptables-restore < /etc/iptables.rules'
-
-[Install]
-WantedBy=network-pre.target
-EOF"; done
-
-for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo systemctl enable restore-iptables-rules.service"; done
+#for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo systemctl enable restore-iptables-rules.service"; done
 
 for i in {1..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo apt update -y && sudo apt-get purge liblxc1 lxcfs lxd lxd-client -y && sudo apt-get install zfsutils-linux -y && sudo snap install lxd"; done
 
