@@ -35,7 +35,6 @@ ssh -o "StrictHostKeyChecking=no" ubuntu@n0
 ### Install Ceph
 git clone https://github.com/vpasias/lxd_cluster.git && ls -lah && \
 cd ~ && cp /home/ubuntu/lxd_cluster/run-conf-ceph.sh . && chmod +x run-conf-ceph.sh && ./run-conf-ceph.sh
-exit
 
 ssh -o "StrictHostKeyChecking=no" ubuntu@n1
 sudo docker exec -it ceph-mon-n1 ceph -s && \
@@ -46,9 +45,8 @@ sudo docker exec -it ceph-mon-n1 ceph osd lspools
 
 exit
 
-### Realise LXD Cluster
+### Realise LXD Cluster - starting at n1
 
-ssh -o "StrictHostKeyChecking=no" ubuntu@n1
 sudo iptables -L
 #sudo newgrp lxd
 
@@ -132,6 +130,9 @@ sudo lxc cluster list && \
 sudo lxc storage list && \
 sudo lxc network show lxdbr0
 
+#sudo lxc config set core.https_address '[::]'
+lxc config set core.trust_password gprm8350
+
 # Test
 sudo lxc launch ubuntu-daily:focal test-1
 sudo lxc launch ubuntu-daily:focal test-2
@@ -146,11 +147,9 @@ sudo lxc delete -f test-1 && sudo lxc delete -f test-2 && sudo lxc delete -f tes
 exit
 
 for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -F FORWARD"; done && \
-for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P FORWARD ACCEPT"; done
-
-#for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -F INPUT"; done && for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P INPUT ACCEPT"; done
-
-#for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -F OUTPUT"; done && for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P OUTPUT ACCEPT"; done
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P FORWARD ACCEPT"; done && \
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -F INPUT"; done && for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P INPUT ACCEPT"; done && \
+for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -F OUTPUT"; done && for i in {0..3}; do ssh -o "StrictHostKeyChecking=no" ubuntu@n$i "sudo iptables -P OUTPUT ACCEPT"; done && \
 
 # Test remote connectivity for juju
 # https://discuss.linuxcontainers.org/t/define-lxd-cluster-as-juju-cloud-corrupt-cluster/4857/2
@@ -172,9 +171,12 @@ juju bootstrap --bootstrap-series=focal --bootstrap-constraints "mem=4G cores=2"
 juju controllers && juju whoami
 # Delete juju controller
 #  juju kill-controller -y lxd
+exit
 
 ### Openstack
 # https://github.com/openstack-charmers/openstack-on-lxd
+
+ssh -o "StrictHostKeyChecking=no" ubuntu@n1
 
 git clone https://github.com/openstack-charmers/openstack-on-lxd.git ~/openstack-on-lxd && cd ~/openstack-on-lxd
 cat lxd-profile.yaml | lxc profile edit juju-default
@@ -182,7 +184,11 @@ cat lxd-profile.yaml | lxc profile edit juju-default
 # Update the LXD cloud container profile
 lxc profile device set juju-default root pool=lxd-ceph
 lxc profile show juju-default
+exit
 
+ssh -o "StrictHostKeyChecking=no" ubuntu@n0
+
+git clone https://github.com/openstack-charmers/openstack-on-lxd.git ~/openstack-on-lxd && cd ~/openstack-on-lxd
 # Deploy the cloud
 juju deploy ./bundle-focal-victoria.yaml
 
