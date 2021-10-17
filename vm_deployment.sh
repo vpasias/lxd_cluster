@@ -195,6 +195,7 @@ network:
   ethernets:
     ens3:
       dhcp4: true
+      dhcp6: false
       routes:                                                                                                                                                                   
         - to: 10.0.8.0/24                                                                                                                                                               
           via: 192.168.254.101
@@ -209,12 +210,15 @@ network:
   ethernets:
     ens3:
       dhcp4: true
+      dhcp6: false     
     ens11:
       dhcp4: false
+      dhcp6: false    
       addresses:
         - 172.16.1.11/24
     ens12:
       dhcp4: false
+      dhcp6: false      
       addresses:
         - 172.16.2.11/24     
 EOF"
@@ -228,12 +232,15 @@ network:
   ethernets:
     ens3:
       dhcp4: true
+      dhcp6: false      
     ens11:
       dhcp4: false
+      dhcp6: false      
       addresses:
         - 172.16.1.12/24
     ens12:
       dhcp4: false
+      dhcp6: false      
       addresses:
         - 172.16.2.12/24     
 EOF"
@@ -247,12 +254,15 @@ network:
   ethernets:
     ens3:
       dhcp4: true
+      dhcp6: false      
     ens11:
       dhcp4: false
+      dhcp6: false      
       addresses:
         - 172.16.1.13/24
     ens12:
       dhcp4: false
+      dhcp6: false      
       addresses:
         - 172.16.2.13/24     
 EOF"
