@@ -143,6 +143,8 @@ sudo lxc exec test-1 -- sh -c "ip a"
 # IP address: 10.0.8.30
 sudo lxc exec test-3 ping ase.com
 sudo lxc exec test-2 -- sh -c "df -hT"
+lxc config device override test-2 root size=100GB
+lxc config device set test-2 root size 100GB
 sudo lxc delete -f test-1 && sudo lxc delete -f test-2 && sudo lxc delete -f test-3
 exit
 
